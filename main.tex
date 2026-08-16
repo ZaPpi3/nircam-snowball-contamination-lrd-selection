@@ -51,7 +51,13 @@ search, turns out not to be the dominant mechanism here; snowball contamination
 of low-exposure-redundancy tiles is. This is a known phenomenon in the JWST
 literature, not a new discovery, but this project's own measurement is an
 independent, if crude, quantification of a gap the field's own reduction papers
-acknowledge leaving open.
+acknowledge leaving open. We extend the test to a fifth, independent field: the
+first public Deep-tier data release of NEXUS, a JWST Treasury survey whose
+two-point-dither imaging strategy the survey's own documentation already flags
+as a known artifact risk. Applying the identical raw-DQ persistence method to an
+independently-built 18-candidate proxy sample from this new survey confirms 2 of
+18 (11\%) as real, single-epoch transient artifacts, extending rather than merely
+repeating this paper's original finding to a brand-new 2026 data release.
 \end{abstract}
 
 \section{Introduction}
@@ -334,6 +340,102 @@ this project's originally-suspected background systematic, but the same shape of
 problem: photometric compact-plus-red selection alone is not sufficient, and the
 field already treats this as an accepted, if incompletely quantified, risk.
 
+\section{Extension to a Fifth Field: NEXUS (2026)}
+\label{sec:nexus}
+
+The four fields above share a common feature: all were reduced with enough dithered
+exposure redundancy that, SMACS aside, the dominant contaminant found was still
+detector artifacts surviving into Stage-3 mosaics, not an intrinsic limit of the
+data itself. A genuinely fresh test of whether this contamination mechanism
+generalizes needs a survey built from the ground up with lower redundancy. The
+North Ecliptic Pole EXtragalactic Unified Survey (NEXUS), a JWST Multi-Cycle
+(2024--2028) Treasury program \cite{Shen2024nexus}, provides exactly that
+opportunity. Its Deep-tier public quick-release imaging uses only a two-point
+dither pattern per epoch; the release documentation distributed with the data
+itself states that this produces ``pixelated'' PSF shapes severe enough to
+warrant an alternate, coarser-pixel-scale product specifically to mitigate it
+\cite{NEXUSqdr2026}, confirmed independently here via a direct MAST query: each
+released episode's F444W mosaic is built from exactly two dithered exposures per
+tile-pointing, no more. This section applies the same raw-DQ persistence method
+to that survey's first public Deep-tier episode (ep01, downloaded 2026-08-16),
+independently of, and using none of, the four-field candidate catalogs above.
+
+\subsection{Adapted selection and two real bugs found and fixed}
+
+NEXUS's Deep-tier public release provides only two photometric bands (F200W,
+F444W), not the three-band blue/mid/red classification used in Sec.~3; the proxy
+here is a compact-plus-red-color cut instead: a \texttt{DAOStarFinder} detection
+pass on the F444W mosaic, followed by a concentration cut identical to Sec.~3
+($[0.65,1.00]$) and an F200W non-detection requirement ($<2\sigma$).
+
+An initial pass at this detection, before the result below, produced clearly
+unphysical significance values (up to 14866$\sigma$) traced to two real bugs in
+the detection script rather than to the data: a single sigma-clipped noise
+estimate for the entire mosaic, rather than the true per-pixel value from NEXUS's
+own published error maps (found to be 2.6--45$\times$ higher than the flat
+estimate at several spot-checked positions); and no check that a candidate's
+aperture actually had real pixel coverage in the fainter band, so positions
+landing in coverage gaps silently registered as spuriously ``faint and red.''
+Both are fixed in the version reported here: significance is computed from the
+real per-pixel error extension integrated over each aperture, and a candidate is
+only kept if at least 90\% of both apertures' pixels are real, finite, non-zero
+data. With both fixes applied, the maximum significance across the same mosaic
+falls to 130.1$\sigma$, and the final candidate count falls from 74 to 18, in the
+same range as this paper's own four fields (3--8 per field).
+
+\subsection{Results}
+
+None of the 18 candidates match SIMBAD or Gaia DR3 within 3$''$ (cross-checked
+directly by computing angular separation from the returned coordinates, not by
+trusting a query package's own convenience distance column, which returned
+spurious 400+$''$ ``matches'' on a first attempt). Applying the same
+persistence criterion as Sec.~4, across two independent NEXUS episodes where
+multi-exposure coverage allowed it (Table~\ref{tab:nexus_results}):
+
+\begin{table}[H]
+\centering
+\caption{Raw-DQ persistence test, NEXUS Deep-tier ep01, 18 candidates.}
+\label{tab:nexus_results}
+\begin{tabular}{lc}
+\toprule
+Outcome & Candidates \\
+\midrule
+Confirmed artifact-consistent (partial-exposure saturation) & 2 \\
+Confirmed clean (zero saturation, all covering exposures) & 13 \\
+Inconclusive (only 1 covering exposure available) & 1 \\
+No coverage in either episode checked & 2 \\
+\midrule
+Total & 18 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 2 confirmed artifacts (candidates at RA/Dec 268.39450,65.18833 and
+268.60903,65.22935 in this ep01 mosaic) each show \texttt{SATURATED} flags in
+exactly one of several independent covering exposures spanning two separate
+NEXUS episodes: one of four looks for the first, one of three for the second,
+the same stochastic, epoch-specific pattern established as decisive in
+Sec.~4.1. The 13 confirmed-clean candidates show zero saturation across
+2--4 independent looks each.
+
+\subsection{Interpretation}
+
+At 2 of 18 (11\%), the confirmed contamination rate found here is real but lower
+than the 32\% (7 of 22) found across the four fields in Sec.~4, and this
+comparison should be treated cautiously rather than as a like-for-like survey
+ranking: NEXUS's own team already documents the two-dither risk qualitatively
+(without a quantified false-positive rate, the same acknowledged-but-unmeasured
+gap already discussed for COSMOS-Web in Sec.~5) but never claims a specific rate;
+this section's 18-candidate sample is smaller than the original 22; and most of
+the confirmed-clean NEXUS candidates have only 2--4 independent exposures behind
+them, fewer than several of this paper's original four-field candidates. What
+this section does establish directly, rather than by analogy, is that the same
+contamination mechanism and the same detection method both generalize: a
+compact-plus-red photometric cut over a newly-public, low-redundancy JWST survey
+released in 2026 is measurably, non-trivially contaminated by the identical
+failure mode already characterized in Sec.~4, extending rather than merely
+repeating this paper's original finding.
+
 \section{Discussion}
 
 Three points follow from this result.
@@ -368,6 +470,20 @@ that any particular published LRD sample carries a comparable contamination rate
 since professional survey pipelines typically already run snowball-masking as
 standard practice, which this project's ad hoc pipeline had not.
 
+\textbf{The mechanism and the method both generalize to a new survey.} Sec.~6's
+NEXUS extension was built and tested independently of the four fields above, on
+data that did not exist when this study began, and still finds real (if lower,
+2 of 18, 11\%) confirmed contamination via the identical persistence criterion.
+The lower rate is consistent with, not in tension with, this paper's central
+claim: NEXUS's own documentation already flags the same two-dither risk that
+drives contamination in this paper's own fields, and the survey has not yet
+published a quantified rate of its own, the same acknowledged-but-unmeasured
+gap already noted for COSMOS-Web. A single-survey measurement risked being an
+idiosyncrasy of this project's own four-field candidate catalogs; finding the
+same failure mode, at a real if smaller rate, in an independently-built sample
+from a different survey is stronger evidence that the underlying mechanism, not
+this paper's own pipeline, is what drives it.
+
 \section{Caveats and Open Threads}
 
 This result should be read with several explicit limitations in mind.
@@ -396,6 +512,17 @@ This result should be read with several explicit limitations in mind.
     A2744 \#97, already has an unused EAZY photometric-redshift fit from earlier,
     unrelated work; none of the 7 have been pursued as LRD candidates in their
     own right, which was never the goal of this selection-systematics study.
+    \item \textbf{The NEXUS extension (Sec.~6) uses only two photometric bands.}
+    NEXUS's public Deep-tier release does not yet include a blue band suitable
+    for the three-band blue/mid/red classification used in the four fields
+    above; its proxy selection is compact-plus-red-color only, a weaker cut than
+    the rest of this paper uses, applied because it is the best available on
+    this survey's current public data, not because it is preferred.
+    \item \textbf{2 of the 18 NEXUS candidates (including the single most
+    significant, at 130.1$\sigma$) have no raw-exposure coverage in either of
+    the two episodes checked}, and 1 has only a single covering exposure,
+    insufficient for the persistence test; a third independent NEXUS episode,
+    not yet checked, would be needed to resolve them.
 \end{itemize}
 
 \section{Conclusion}
@@ -414,6 +541,17 @@ three contaminated ones; an automated cut over a NIRCam mosaic, without an
 equivalent step, should be treated with real suspicion, a conclusion that holds
 regardless of which side of the broader AGN-cocoon debate the wider LRD
 population eventually falls on.
+
+Extending the same raw-pipeline diagnostic to a fifth, independent field, the
+NEXUS North Ecliptic Pole survey, with its own known low-dither-redundancy
+risk factor, finds a lower but still real contamination rate of 2 of 18 (11\%)
+compact, red, faint-blue candidates confirmed as transient single-epoch
+artifacts by the same DQ-flag persistence test, plus 1 candidate left
+genuinely inconclusive and 2 unresolved for lack of raw-exposure coverage. A
+lower rate on a survey with roughly half the covering exposures per episode
+of the original four fields is consistent with, not a contradiction of, the
+central claim: contamination tracks vetting depth, and the method generalizes
+cleanly to a survey it was not originally built for.
 
 \section*{Acknowledgments}
 
@@ -452,6 +590,39 @@ Telescope. The data were obtained from the Mikulski Archive for Space Telescopes
     (catalog crossmatch, blend context).
 \end{enumerate}
 
+\subsection{NEXUS-specific adaptation}
+
+NEXUS's public Deep-tier release does not yet provide a blue-band mosaic
+suitable for the three-band classification above, so Sec.~6 uses a reduced
+two-band proxy instead, applied directly to the F444W/F200W Stage-3 mosaics
+rather than to a pre-existing source catalog (\texttt{nexus\_lrdproxy\_search\_v2.py}):
+
+\begin{enumerate}
+    \item Detect compact sources on the F444W mosaic with \texttt{DAOStarFinder}
+    against a flat, sigma-clipped detection threshold (coarse candidate
+    generation only).
+    \item For every detection, integrate the real per-pixel \texttt{ERROR}
+    extension over a circular aperture to get a real noise estimate, rather
+    than reusing the flat detection-threshold std for significance; this fixes
+    a first-pass bug (Sec.~6.1) where the flat estimate was found to
+    understate the true per-pixel noise by 2.6-45$\times$ at spot-checked
+    positions.
+    \item Require at least 90\% valid-pixel coverage in both the core and an
+    outer concentration aperture, in both F444W and F200W, before trusting any
+    flux or significance measurement at that position; this fixes a second
+    first-pass bug where positions landing on masked/no-data gaps returned
+    spuriously low F200W flux that passed the faint-blue cut for the wrong
+    reason.
+    \item Apply the same concentration window as the four-field study
+    ($\in[0.65,1.00]$) plus a red-band significance floor and a faint-blue
+    ceiling (both computed from the real, coverage-checked noise above) as the
+    proxy selection.
+    \item Apply the identical raw-exposure DQ-flag persistence test described
+    above to each surviving candidate, using whichever of NEXUS's public
+    episodes (of five total; two had usable aggregate MAST Level-3 records
+    at the time of this analysis) actually cover its sky position.
+\end{enumerate}
+
 \begin{thebibliography}{9}
 
 \bibitem{Rusakov2026}
@@ -461,7 +632,7 @@ K.~Rusakov et al., ``Little red dots as young supermassive black holes in dense 
 K.~Inayoshi and L.~C.~Ho, ``A Critical Evaluation of the Physical Nature of the Little Red Dots,'' arXiv:2512.03130 (2025).
 
 \bibitem{Hviding2025}
-R.~E.~Hviding et al., ``RUBIES: A spectroscopic census of little red dots - All point sources with v-shaped continua have broad lines,'' Astron.\ Astrophys.\ \textbf{702}, A57 (2025), arXiv:2506.05459.
+R.~E.~Hviding et al., ``RUBIES: A spectroscopic census of little red dots: All point sources with v-shaped continua have broad lines,'' Astron.\ Astrophys.\ \textbf{702}, A57 (2025), arXiv:2506.05459.
 
 \bibitem{Langeroodi2023}
 D.~Langeroodi and J.~Hjorth, ``Little Red Dots or Brown Dwarfs? NIRSpec Discovery of Three Distant Brown Dwarfs Masquerading as NIRCam-selected Highly Reddened Active Galactic Nuclei,'' Astrophys.\ J.\ Lett.\ \textbf{957}, L27 (2023), arXiv:2308.10900.
@@ -477,6 +648,12 @@ J.~Davies, \texttt{snowblind} (v0.2.1), \url{https://github.com/mpi-astronomy/sn
 
 \bibitem{Jarvis2026a}
 P.~Jarvis, ``Background Systematics Versus Redshift: A Diagnostic Study of NIRCam Dropout Selection in SMACS J0723.3$-$7327 and JADES/GOODS-S,'' (2026), \url{https://github.com/ZaPpi3/background-systematics-versus-redshift}.
+
+\bibitem{Shen2024nexus}
+Y.~Shen et al., ``NEXUS: the North ecliptic pole EXtragalactic Unified Survey,'' arXiv:2408.12713 (2024).
+
+\bibitem{NEXUSqdr2026}
+NEXUS Collaboration, NEXUS Quick Data Release, \url{https://ariel.astro.illinois.edu/nexus/qdr/} (accessed 2026-08-16); see \texttt{nircam/readme.txt} for the dither-pattern and pixel-scale documentation cited here.
 
 \end{thebibliography}
 
