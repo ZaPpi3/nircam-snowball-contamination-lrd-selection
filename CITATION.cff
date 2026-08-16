@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you reference this paper, please cite it as below."
+title: "Snowball Contamination of Compact, Red Source Selections in JWST NIRCam Imaging: A Case Study Motivated by the Little Red Dot Population"
+authors:
+  - family-names: Jarvis
+    given-names: Paul
+    email: mrpaulwjarvis@gmail.com
+date-released: "2026-08-13"
+license: MIT
+type: software
+keywords:
+  - JWST
+  - NIRCam
+  - Little Red Dots
+  - snowball artifact
+  - cosmic ray
+  - detector systematics
+  - source selection
