@@ -349,7 +349,7 @@ detector artifacts surviving into Stage-3 mosaics, not an intrinsic limit of the
 data itself. A genuinely fresh test of whether this contamination mechanism
 generalizes needs a survey built from the ground up with lower redundancy. The
 North Ecliptic Pole EXtragalactic Unified Survey (NEXUS), a JWST Multi-Cycle
-(2024--2028) Treasury program \cite{Shen2024nexus}, provides exactly that
+(2024-2028) Treasury program \cite{Shen2024nexus}, provides exactly that
 opportunity. Its Deep-tier public quick-release imaging uses only a two-point
 dither pattern per epoch; the release documentation distributed with the data
 itself states that this produces ``pixelated'' PSF shapes severe enough to
@@ -372,7 +372,7 @@ An initial pass at this detection, before the result below, produced clearly
 unphysical significance values (up to 14866$\sigma$) traced to two real bugs in
 the detection script rather than to the data: a single sigma-clipped noise
 estimate for the entire mosaic, rather than the true per-pixel value from NEXUS's
-own published error maps (found to be 2.6--45$\times$ higher than the flat
+own published error maps (found to be 2.6-45$\times$ higher than the flat
 estimate at several spot-checked positions); and no check that a candidate's
 aperture actually had real pixel coverage in the fainter band, so positions
 landing in coverage gaps silently registered as spuriously ``faint and red.''
@@ -381,7 +381,7 @@ real per-pixel error extension integrated over each aperture, and a candidate is
 only kept if at least 90\% of both apertures' pixels are real, finite, non-zero
 data. With both fixes applied, the maximum significance across the same mosaic
 falls to 130.1$\sigma$, and the final candidate count falls from 74 to 18, in the
-same range as this paper's own four fields (3--8 per field).
+same range as this paper's own four fields (3-8 per field).
 
 \subsection{Results}
 
@@ -416,7 +416,7 @@ exactly one of several independent covering exposures spanning two separate
 NEXUS episodes: one of four looks for the first, one of three for the second,
 the same stochastic, epoch-specific pattern established as decisive in
 Sec.~4.1. The 13 confirmed-clean candidates show zero saturation across
-2--4 independent looks each.
+2-4 independent looks each.
 
 \subsection{Interpretation}
 
@@ -427,7 +427,7 @@ ranking: NEXUS's own team already documents the two-dither risk qualitatively
 (without a quantified false-positive rate, the same acknowledged-but-unmeasured
 gap already discussed for COSMOS-Web in Sec.~5) but never claims a specific rate;
 this section's 18-candidate sample is smaller than the original 22; and most of
-the confirmed-clean NEXUS candidates have only 2--4 independent exposures behind
+the confirmed-clean NEXUS candidates have only 2-4 independent exposures behind
 them, fewer than several of this paper's original four-field candidates. What
 this section does establish directly, rather than by analogy, is that the same
 contamination mechanism and the same detection method both generalize: a
